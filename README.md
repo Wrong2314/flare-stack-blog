@@ -34,6 +34,7 @@
 | Durable Objects | 分布式限流                   |
 | Workflows       | 异步任务（邮件、内容审核等） |
 | Workers AI      | AI 能力                      |
+| Images          | 图片优化                     |
 
 ### 前端
 
@@ -133,6 +134,8 @@ src/
    - 创建 API Token（需要 Worker 部署 + D1 读写权限）— **仅方式一需要**
 5. **GitHub OAuth App** — 在 GitHub Developer Settings 创建 OAuth App，获取 Client ID 和 Secret
    - Authorization callback URL：`https://<your-domain>/api/auth/callback/github`
+6. **图片优化（可选）** — 在 Cloudflare Dashboard 中为你的域名开启 [Cloudflare Images](https://developers.cloudflare.com/images/)，每月 5000 次 unique transformations 免费额度
+7. **邮件通知（可选）** — 注册 [Resend](https://resend.com) 并绑定域名，在博客后台「设置」页面配置 API Key。每月 3000 封免费额度。配置后可启用密码登录、验证码、回复通知、找回密码等功能
 
 ---
 
@@ -272,7 +275,6 @@ bun dev
 | `bun db:studio`   | 启动 Drizzle Studio（可视化数据库） |
 | `bun db:generate` | 生成迁移文件                        |
 | `bun db:migrate`  | 应用迁移到远程 D1                   |
-| `bun db:push`     | 直接推送 Schema 到数据库            |
 
 ### 环境变量
 
