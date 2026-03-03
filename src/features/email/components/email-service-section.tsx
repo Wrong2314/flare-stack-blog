@@ -16,7 +16,7 @@ interface EmailSectionProps {
       senderName?: string;
     };
   }) => Promise<
-    Result<{ success: true }, { reason: "SEND_FAILED"; message: string }>
+    Result<{ success: boolean }, { reason: "SEND_FAILED"; message: string }>
   >;
 }
 

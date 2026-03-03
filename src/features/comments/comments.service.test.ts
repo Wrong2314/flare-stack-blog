@@ -117,12 +117,11 @@ describe("CommentService", () => {
         }),
       );
 
-      const moderatedComment = await CommentService.moderateComment(
-        adminContext,
-        {
+      const moderatedComment = unwrap(
+        await CommentService.moderateComment(adminContext, {
           id: comment.id,
           status: "published",
-        },
+        }),
       );
 
       expect(moderatedComment.status).toBe("published");
@@ -143,12 +142,11 @@ describe("CommentService", () => {
       });
 
       // Then mark as pending for re-review
-      const pendingComment = await CommentService.moderateComment(
-        adminContext,
-        {
+      const pendingComment = unwrap(
+        await CommentService.moderateComment(adminContext, {
           id: comment.id,
           status: "pending",
-        },
+        }),
       );
 
       expect(pendingComment.status).toBe("pending");
@@ -197,11 +195,10 @@ describe("CommentService", () => {
       });
       await seedUser(otherUserContext.db, otherUserSession.user);
 
-      await expect(
-        CommentService.deleteComment(otherUserContext, {
-          id: comment.id,
-        }),
-      ).rejects.toThrow("PERMISSION_DENIED");
+      const result = await CommentService.deleteComment(otherUserContext, {
+        id: comment.id,
+      });
+      expect(result.error?.reason).toBe("PERMISSION_DENIED");
     });
 
     it("should allow admin to hard delete any comment", async () => {

@@ -206,13 +206,13 @@ export async function deleteComment(
   const comment = await CommentRepo.findCommentById(context.db, data.id);
 
   if (!comment) {
-    throw new Error("COMMENT_NOT_FOUND");
+    return err({ reason: "COMMENT_NOT_FOUND" });
   }
 
   // Only allow deleting own comments (unless admin)
   const userRole = context.session.user.role;
   if (comment.userId !== context.session.user.id && userRole !== "admin") {
-    throw new Error("PERMISSION_DENIED");
+    return err({ reason: "PERMISSION_DENIED" });
   }
 
   // Soft delete by setting status to deleted
@@ -220,7 +220,7 @@ export async function deleteComment(
     status: "deleted",
   });
 
-  return { success: true };
+  return ok({ success: true });
 }
 
 export async function getMyComments(
@@ -274,7 +274,7 @@ export async function moderateComment(
   const comment = await CommentRepo.findCommentById(context.db, data.id);
 
   if (!comment) {
-    throw new Error("COMMENT_NOT_FOUND");
+    return err({ reason: "COMMENT_NOT_FOUND" });
   }
 
   const updatedComment = await CommentRepo.updateComment(context.db, data.id, {
@@ -306,7 +306,7 @@ export async function moderateComment(
     }
   }
 
-  return updatedComment;
+  return ok(updatedComment);
 }
 
 export async function adminDeleteComment(
@@ -316,13 +316,13 @@ export async function adminDeleteComment(
   const comment = await CommentRepo.findCommentById(context.db, data.id);
 
   if (!comment) {
-    throw new Error("COMMENT_NOT_FOUND");
+    return err({ reason: "COMMENT_NOT_FOUND" });
   }
 
   // Hard delete for admin
   await CommentRepo.deleteComment(context.db, data.id);
 
-  return { success: true };
+  return ok({ success: true });
 }
 
 // ============ Workflow Methods ============

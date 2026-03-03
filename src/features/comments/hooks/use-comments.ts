@@ -61,7 +61,23 @@ export function useComments(postId?: number) {
   });
 
   const deleteCommentMutation = useMutation({
-    mutationFn: deleteCommentFn,
+    mutationFn: async (input: Parameters<typeof deleteCommentFn>[0]) => {
+      const result = await deleteCommentFn(input);
+      if (result.error) {
+        const reason = result.error.reason;
+        switch (reason) {
+          case "COMMENT_NOT_FOUND":
+            throw new Error("评论不存在或已删除");
+          case "PERMISSION_DENIED":
+            throw new Error("无权限删除该评论");
+          default: {
+            reason satisfies never;
+            throw new Error("未知错误");
+          }
+        }
+      }
+      return result.data;
+    },
     onSuccess: () => {
       // Invalidate both root comments and all replies queries for this post
       if (postId) {
@@ -103,7 +119,22 @@ export function useAdminComments() {
   const queryClient = useQueryClient();
 
   const moderateMutation = useMutation({
-    mutationFn: moderateCommentFn,
+    mutationFn: async (input: Parameters<typeof moderateCommentFn>[0]) => {
+      const result = await moderateCommentFn(input);
+      if (result.error) {
+        const reason = result.error.reason;
+        switch (reason) {
+          // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+          case "COMMENT_NOT_FOUND":
+            throw new Error("评论不存在");
+          default: {
+            reason satisfies never;
+            throw new Error("未知错误");
+          }
+        }
+      }
+      return result.data;
+    },
     onSuccess: () => {
       // Invalidate all comment related queries to be safe since moderation
       // affects visibility in both admin and public views
@@ -116,7 +147,22 @@ export function useAdminComments() {
   });
 
   const adminDeleteMutation = useMutation({
-    mutationFn: adminDeleteCommentFn,
+    mutationFn: async (input: Parameters<typeof adminDeleteCommentFn>[0]) => {
+      const result = await adminDeleteCommentFn(input);
+      if (result.error) {
+        const reason = result.error.reason;
+        switch (reason) {
+          // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+          case "COMMENT_NOT_FOUND":
+            throw new Error("评论不存在");
+          default: {
+            reason satisfies never;
+            throw new Error("未知错误");
+          }
+        }
+      }
+      return result.data;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: COMMENTS_KEYS.all });
       toast.success("评论已永久删除");
