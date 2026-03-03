@@ -159,7 +159,21 @@ export function BackupRestoreSection() {
       {},
       {
         onSuccess: (result) => {
-          setExportTaskId(result.taskId);
+          if (result.error) {
+            const reason = result.error.reason;
+            switch (reason) {
+              // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+              case "WORKFLOW_CREATE_FAILED":
+                toast.error("启动失败", { description: "启动导出任务失败" });
+                return;
+              default: {
+                reason satisfies never;
+                toast.error("启动失败", { description: "未知错误" });
+                return;
+              }
+            }
+          }
+          setExportTaskId(result.data.taskId);
         },
         onError: (error) => {
           toast.error("启动失败", { description: error.message });
@@ -220,7 +234,26 @@ export function BackupRestoreSection() {
 
     uploadMutation.mutate(formData, {
       onSuccess: (result) => {
-        setImportTaskId(result.taskId);
+        if (result.error) {
+          const reason = result.error.reason;
+          switch (reason) {
+            case "NO_FILES":
+              toast.error("上传失败", { description: "缺少文件" });
+              return;
+            case "UPLOAD_FAILED":
+              toast.error("上传失败", { description: "上传文件失败，请重试" });
+              return;
+            case "WORKFLOW_CREATE_FAILED":
+              toast.error("上传失败", { description: "启动导入任务失败" });
+              return;
+            default: {
+              reason satisfies never;
+              toast.error("上传失败", { description: "未知错误" });
+              return;
+            }
+          }
+        }
+        setImportTaskId(result.data.taskId);
       },
       onError: (error) => {
         toast.error("上传失败", { description: error.message });
